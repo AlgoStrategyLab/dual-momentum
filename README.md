@@ -45,6 +45,6 @@ python make_charts.py               # renders output/chart*.png
 | `output/dual_momentum_summary.json` | Every robustness result in the article |
 | `output/dual_momentum_series.csv` | Daily equity, drawdown and holding |
 
-Article: coming soon on Medium. Engine: [strategylab-core](https://github.com/AlgoStrategyLab/strategylab-core).
+Article: **[Read it here](https://algostrategylab.github.io/dual-momentum/)**. Engine: [strategylab-core](https://github.com/AlgoStrategyLab/strategylab-core).
 
 MIT licensed. Research and education only, not investment advice.
