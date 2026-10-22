@@ -132,3 +132,45 @@ axes[0].legend(loc="upper right")
 fig.suptitle("Before vs after the strategy was published (2014)", fontweight="semibold")
 fig.tight_layout(); fig.savefig(OUT / "chart6_inout.png"); plt.close(fig)
 print("charts written")
+
+# 7. Monthly returns heatmap
+main = json.load(open(OUT / "dual_momentum_main.json"))
+mr = pd.DataFrame(main["monthly_returns"]).T
+mr.index = mr.index.astype(int)
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+grid = mr[months].astype(float) * 100
+yr = mr["Year"].astype(float) * 100
+fig, ax = plt.subplots(figsize=(11, 9.5), dpi=160)
+from matplotlib.colors import TwoSlopeNorm
+norm = TwoSlopeNorm(vmin=-12, vcenter=0, vmax=12)
+im = ax.imshow(grid.values, cmap="RdBu", norm=norm, aspect="auto")
+ax.set_xticks(range(12)); ax.set_xticklabels(months)
+ax.set_yticks(range(len(grid))); ax.set_yticklabels(grid.index)
+ax.grid(False)
+for i in range(len(grid)):
+    for j in range(12):
+        v = grid.values[i, j]
+        if not np.isnan(v):
+            ax.text(j, i, f"{v:.1f}", ha="center", va="center", fontsize=7.5,
+                    color="white" if abs(v) > 6 else C["ink"])
+# year column
+for i, (y, v) in enumerate(yr.items()):
+    ax.text(12.3, i, f"{v:+.1f}%", ha="left", va="center", fontsize=8.5, fontweight="bold",
+            color=C["blue"] if v >= 0 else C["red"])
+ax.text(12.3, -0.9, "Year", ha="left", va="center", fontsize=9, color=C["ink2"])
+ax.set_xlim(-0.5, 13.5)
+ax.set_title("Dual Momentum: monthly returns (%), May 1997 – Oct 2026")
+fig.tight_layout(); fig.savefig(OUT / "chart7_monthly_heatmap.png"); plt.close(fig)
+
+# 8. Underwater plot with top-5 drawdowns labelled
+dds = main["drawdowns"][:5]
+fig, ax = plt.subplots(figsize=(11, 3.6), dpi=160)
+ax.fill_between(s.index, s["GEM_dd"] * 100, 0, color=C["blue"], alpha=0.55, lw=0)
+for k, d in enumerate(dds, 1):
+    t = pd.Timestamp(d["trough"])
+    ax.annotate(f"#{k} {d['depth']*100:.0f}%", xy=(t, d["depth"] * 100), xytext=(0, -14), textcoords="offset points",
+                ha="center", fontsize=8.5, color=C["ink"])
+ax.set_ylim(-42, 2); ax.set_ylabel("Drawdown (%)"); ax.set_title("Underwater plot: the five deepest drawdowns")
+ax.xaxis.set_major_locator(mdates.YearLocator(3))
+fig.tight_layout(); fig.savefig(OUT / "chart8_underwater.png"); plt.close(fig)
+print("extra charts written")
